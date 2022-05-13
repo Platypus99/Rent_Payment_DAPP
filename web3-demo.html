@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Rent Payment DAPP</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <!-- <script src='node_modules/web3/dist/web3.min.js'></script> -->
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@0.18.2/dist/web3.min.js"></script>
+
+
+</head>
+
+<body>
+
+    <h1>Rent Payment DAPP</h1>
+    <h2>Created by Perry Flamer and Angel Estigarribia</h2>
+
+
+    Web 3 Demo
+    <br>
+    <!-- <br>
+    <button onclick="extend();">Extend Payment Period (Allow late payments)</button>
+ 
+    <button onclick="claimTimeout();">Claim Timeout</button> -->
+
+    <br>
+
+    <input type="text" name="landlordAddr" id="lladdress">
+    <button onclick="setllAddress()"> Submit Landlord's Address</button>
+
+    <script>
+        function setllAddress() {
+            var addressLL = document.getElementById("lladdress").value;
+            updateLLaddress(`Paying to landlord with address  ${addressLL}`);
+            return addressLL;
+        }
+    </script>
+    <br>
+
+
+
+
+    <br>
+    <input type="text" name="depositVal" id="dep">
+    <button onclick="setDeposit()"> Set Rent Price</button>
+
+    <button onclick="payRent();">Pay Rent</button>
+
+    <br>
+    <script>
+        function setDeposit() {
+            var amountDeposit = document.getElementById("dep").value;
+            return amountDeposit;
+        }
+    </script>
+    <br>
+
+    <input type="text" name="duration" id="dur">
+    <button onclick="SetDays()"> Rent Payment Period</button>
+
+    <script>
+        function SetDays() {
+            var daysDuration = document.getElementById("dur").value;
+            return daysDuration;
+        }
+    </script>
+    <br>
+
+    <br>
+    <input type="text" name="DaysExtension" id="start">
+    <button onclick="extend()">Request Due Date Extension (In Days)</button>
+    <br>
+    
+
+<br>
+
+
+    <script type="text/javascript">
+
+
+        async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+            }
+        }
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+            updateStatus('Ready!');
+        }
+
+        async function loadContract() {
+            const loadDur = document.getElementById("dur").value;
+            updateStatus(`Extending payment period by ${loadDur}`);
+            const loadllAddress = document.getElementById("lladdress").value;
+
+            return await new window.web3.eth.Contract([
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address payable",
+                            "name": "landlordAddress",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "duration",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "payable",
+                    "type": "constructor"
+                },
+                {
+                    "inputs": [],
+                    "name": "expiration",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "landlord",
+                    "outputs": [
+                        {
+                            "internalType": "address payable",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "tenant",
+                    "outputs": [
+                        {
+                            "internalType": "address payable",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address",
+                            "name": "account",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "balanceOf",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "amount",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "payRent",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "newExpiration",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "extend",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "claimTimeout",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                }
+            ], '0x8dD24CF98d1162c13E2876525a440eF3b333B684' , 1);
+        }
+//  loadDur       
+// loadllAddress
+        // async function printCoolNumber() {
+        //     updateStatus('fetching Cool Number...');
+        //     const coolNumber = await window.contract.methods.coolNumber().call();
+        //     updateStatus(`coolNumber: ${coolNumber}`);
+        // }
+
+        async function getCurrentAccount() {
+            const accounts = await window.web3.eth.getAccounts();
+            return accounts[0];
+        }
+
+
+        async function payRent() {
+            // const deposit = 0.01;
+            const deposit = document.getElementById("dep").value;
+            updateStatus(`Updating rent payment with ${deposit}`);
+            const account = await getCurrentAccount();
+            updateStatus(`Rent payment of ${deposit} sent from ${account}`);
+            const payingRent = await window.contract.methods.payRent(value).send({ from: account, value: deposit});
+            updateStatus(`Rent payment of ${deposit} sent from ${account}`);
+        }
+
+        async function extend() {
+            const numDays = document.getElementById("start").value;
+            const newExpiration = numDays * 86400;
+            updateStatus(`Requesting extension of payment period by ${numDays} days`);
+            const account = await getCurrentAccount();
+            const daysExtended = await window.contract.methods.extend(newExpiration).send({ from: account, value: newExpiration});
+            updateStatus('Updated.');
+        }
+    
+        function updateStatus(status) {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = status;
+            console.log(status);
+        }
+
+        function updateLLaddress(addressLL) {
+            const statusEl1 = document.getElementById('addressLL');
+            statusEl1.innerHTML = addressLL;
+            console.log(addressLL);
+        }
+
+        load();
+    </script>
+</body>
+
+</html>
+
+<br />
+Status: <span id="status">Loading...</span>
+<br />
+<span id="addressLL">Loading...</span>
+<br>
+
+
+
